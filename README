@@ -1,0 +1,38 @@
+Introduction
+============
+AWS S3 Server Side Logging allows owners of S3 bucket to analyze the access 
+requests to the S3 buckets. However, the access logs is in a row format and 
+uncompressed. To effectively analyze the logs, you want to compact the raw
+logs into a columnar format. With columnar format, many query engines such
+as SparkSQL and Prestodb can retrieve data via SQL syntax effectively. 
+
+This project contains a Pyspark script that can be run inside Spark cluster.
+The script will compact each day's data into snappy-compressed Parquet files.
+
+Yelp uses this approach to effectively analyze large amount of our S3 server
+access logs.
+
+Bootstraping
+============
+Once you deploy this script into your spark cluster, you should use
+spark-submit to run the script.
+
+spark-submit /code/redshift_to_parquet_spark/batch/oss_s3_server_side_logging_compacter.py  \
+        --aws-config <path to JSON file with your credentials> \
+        --min-date 2019-02-10 \
+        --max-date 2019-02-11 \
+        --source-access-log-bucket <YOUR ACCESS LOG BUCKET> \
+        --source-bucket <YOUR BUCKET that originates the logs> \
+        --destination-log-bucket <S3 bucket that will hold the compacted log> \
+        --destination-log-prefix <S3 prefix to use to store the lgos> \
+        --num-output-files 15
+
+An example of the aws-config
+
+$ cat something.key
+
+{
+        "accessKeyId": "YOUR_AWS_ACCESS_KEY",
+        "secretAccessKey": "YOUR_AWS_SECRET_KEY",
+        "region": "us-west-2"
+}
