@@ -12,12 +12,34 @@ The script will compact each day's data into snappy-compressed Parquet files.
 Yelp uses this approach to effectively analyze large amount of our S3 server
 access logs.
 
-Bootstraping
-============
+Bootstraping (if you do not have a spark environment)
+=====================================================
+We recommend you consult AWS documentation spin up a emphermal AWS EMR cluster
+to run Spark program. inside the bootstrap/aws_emr folder, there is a series of
+script that get you started.
+
+1. Pick an existing s3 bucket and modify the upload_* script to upload both the 
+bootstrap script and AWS logs to conversion script.
+
+2. Use the same s3 bucket and modify the launch_emr_cluster.sh script. Then use
+the launch_emr_cluster script to bootstrap the cluster.
+
+Currently, the script launches a 1 m3.xlarge as EMR Master and 2 m2.xlarge EMR
+Slaves. You account will incur chages from EMR. After you are done, you should
+shutdown your EMR cluster because the actual data are stored in S3 anyway.
+
+3. Once the EMR cluster is bootstraped, note the cluster id and appropriate key
+pair and update the login_emr.sh script to login the master node.
+
+4. download the conversion script you uploaded from s3 and execute the follow
+section by running spark-submit.
+
+Bootstraping (if you have a spark environment)
+==============================================
 Once you deploy this script into your spark cluster, you should use
 spark-submit to run the script.
 
-spark-submit /code/redshift_to_parquet_spark/batch/oss_s3_server_side_logging_compacter.py  \
+spark-submit scripts/oss_s3_server_side_logging_compacter.py  \
         --aws-config <path to JSON file with your credentials> \
         --min-date 2019-02-10 \
         --max-date 2019-02-11 \
