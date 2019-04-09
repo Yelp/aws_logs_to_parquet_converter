@@ -308,6 +308,11 @@ class S3ServerSideLoggingCompacter(object):
 
     def custom_options(self, parser):
         parser.add_argument(
+            '--aws-config',
+            default='',
+            help='Path to aws config file. Default: %(default)s',
+        )
+        parser.add_argument(
             '--source-access-log-bucket',
             default='your-s3-bucket-where-s3-access-logs-are',
             help='The S3 bucket storing s3 servier side logging  Default: %(default)s',
