@@ -84,3 +84,7 @@ $ . bin/venv/activate
 $ pre-commit run -a  # we shouldn't need to scan all files, but i am still
 debugging a setup issue
 
+Alternatives
+============
+1. AWS Labs Athena Glue Service docs (https://github.com/awslabs/athena-glue-service-logs)
+"Warning These jobs can incur a significant amount of cost depending on how much data you have in your source location!"
