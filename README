@@ -62,6 +62,11 @@ $ cat something.key
         "region": "us-west-2"
 }
 
+Note: the keys in clear at the time of execution is bad... However, depends
+on your deployment setup, you can eliminate it based on AWS EC2 Instance
+profile or role. In the future, we like to abstract away the s3 client
+module usage to plumb in your choice of authentication to s3.
+
 Development
 ===========
 If you like to submit pull-request on this repository, we try to automate 
