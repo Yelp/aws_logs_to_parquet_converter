@@ -34,6 +34,9 @@ pair and update the login_emr.sh script to login the master node.
 4. download the conversion script you uploaded from s3 and execute the follow
 section by running spark-submit.
 
+Note: At Yelp, we mostly use our Platform-as-a-service PaaSTA to execute on our
+Spark programs. So we package docker image to deploy and run our spark programs.
+
 Bootstraping (if you have a spark environment)
 ==============================================
 Once you deploy this script into your spark cluster, you should use
@@ -58,3 +61,15 @@ $ cat something.key
         "secretAccessKey": "YOUR_AWS_SECRET_KEY",
         "region": "us-west-2"
 }
+
+Development
+===========
+If you like to submit pull-request on this repository, we try to automate 
+some tasks, please use the following procedure.
+
+$ make venv
+$ make requirements
+$ . bin/venv/activate
+$ pre-commit run -a  # we shouldn't need to scan all files, but i am still
+debugging a setup issue
+
