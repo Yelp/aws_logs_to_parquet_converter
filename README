@@ -1,5 +1,5 @@
-Introduction
-============
+# Introduction
+
 AWS S3 Server Side Logging allows owners of S3 bucket to analyze the access 
 requests to the S3 buckets. However, the access logs is in a row format and 
 uncompressed. To effectively analyze the logs, you want to compact the raw
@@ -12,8 +12,8 @@ The script will compact each day's data into snappy-compressed Parquet files.
 Yelp uses this approach to effectively analyze large amount of our S3 server
 access logs.
 
-Bootstraping (if you do not have a spark environment)
-=====================================================
+# Bootstraping (if you do not have a spark environment)
+
 We recommend you consult AWS documentation spin up a emphermal AWS EMR cluster
 to run Spark program. inside the bootstrap/aws_emr folder, there is a series of
 script that get you started.
@@ -37,8 +37,8 @@ section by running spark-submit.
 Note: At Yelp, we mostly use our Platform-as-a-service PaaSTA to execute on our
 Spark programs. So we package docker image to deploy and run our spark programs.
 
-Bootstraping (if you have a spark environment)
-==============================================
+# Bootstraping (if you have a spark environment)
+
 Once you deploy this script into your spark cluster, you should use
 spark-submit to run the script.
 
@@ -67,14 +67,14 @@ on your deployment setup, you can eliminate it based on AWS EC2 Instance
 profile or role. In the future, we like to abstract away the s3 client
 module usage to plumb in your choice of authentication to s3.
 
-High level Dependency
-===========
+# High level Dependency
+
 * Only works with AWS S3 Server Side Logging
 * Tested only with Python 3.6
 * Tested only with Spark 2.3.2
 
-Development
-===========
+# Development
+
 If you like to submit pull-request on this repository, we try to automate 
 some tasks, please use the following procedure.
 
@@ -84,7 +84,7 @@ $ . bin/venv/activate
 $ pre-commit run -a  # we shouldn't need to scan all files, but i am still
 debugging a setup issue
 
-Alternatives
-============
+# Alternatives
+
 1. AWS Labs Athena Glue Service docs (https://github.com/awslabs/athena-glue-service-logs)
 "Warning These jobs can incur a significant amount of cost depending on how much data you have in your source location!"
