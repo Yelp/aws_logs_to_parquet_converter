@@ -78,11 +78,13 @@ module usage to plumb in your choice of authentication to s3.
 If you like to submit pull-request on this repository, we try to automate 
 some tasks, please use the following procedure.
 
+```
 $ make venv
 $ make requirements
 $ . bin/venv/activate
 $ pre-commit run -a  # we shouldn't need to scan all files, but i am still
 debugging a setup issue
+```
 
 # Alternatives
 
