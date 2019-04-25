@@ -25,9 +25,10 @@ S3_ACCESS_LOG_PATTERN = re.compile(r'(?P<owner>\S+) (?P<bucket>\S+) (?P<time>\[[
                                    r'(?P<useragent>"[^"]*"|-) (?P<version>\S)')
 
 
-# Different deployment strategy may require you to pass in credentials
-# using different method.
 def get_aws_key_and_secret(aws_creds_file_path):
+    """ Given a filename containing AWS credentials (see README.md),
+        return a 2-tuple (access key, secret key).
+    """
     with open(aws_creds_file_path, 'r') as f:
         creds_dict = json.load(f)
     return creds_dict['accessKeyId'], creds_dict['secretAccessKey']
@@ -41,8 +42,8 @@ def parse_s3_access_time(s):
         return None
 
 
-# Returns a Row containing the Apache Access Log info
 def parse_apache_log_line(logline):
+    """ Given a log line, return a row containing the Apache Access Log info. """
     match = S3_ACCESS_LOG_PATTERN.search(logline)
     if match is None:
         return Row(
@@ -125,6 +126,7 @@ S3_ACCESS_LOG_OUTPUT_SCHEMA = StructType(
 
 
 def list_bucket_with_prefix(s3_client, bucket, prefix):
+    """ Paginated listing of contents within an S3 bucket prefix. """
     token = None
     more_keys = True
     keys = []
@@ -145,6 +147,7 @@ def list_bucket_with_prefix(s3_client, bucket, prefix):
 
 
 def get_s3a_paths(s3_client, bucket, prefix):
+    """ Mutate S3 object keys into a fully qualified s3a URI. """
     return ['s3a://{}/{}'.format(bucket, key) for key in list_bucket_with_prefix(s3_client, bucket, prefix)]
 
 
@@ -183,9 +186,9 @@ def convert_s3_access_logs_to_parquet(
         .builder
         #
         # .appName('s3_server_side_log_compacter')
-        # While this setting is default already, better play safe and guard
-        #   against changes in future Spark versions as long as we use the
-        #   version 2 fileoutputcommitter. Context: UDS-4
+        # While this setting is already default, we want to be conservative and  guard
+        #   against changes in future Spark versions, for as long as we use the
+        #   version 2 fileoutputcommitter.
         .config('spark.speculation', 'false')
         # Note: We want to use timestamp with millis for Parquet
         .config('spark.sql.parquet.int64AsTimestampMillis', 'true')
@@ -214,7 +217,7 @@ def convert_s3_access_logs_to_parquet(
     access_logs_df = spark.createDataFrame(
         contents_rdd, S3_ACCESS_LOG_OUTPUT_SCHEMA)
 
-    # The following is just to patch request_time into timestamp type
+    # The following patches request_time into a proper timestamp.
     access_logs_df = access_logs_df.withColumn('request_time', to_timestamp(
         access_logs_df.request_time_string, format="yyyy-MM-dd'T'HH:mm:ss"))
     access_logs_df = access_logs_df.select(
@@ -247,10 +250,9 @@ def convert_s3_access_logs_to_parquet(
         destination_log_prefix=destination_log_prefix,
     )
 
-    # DATALAKE-163 Hot fix sorting issue
-    # 1. repartition first to get our desired number of parquet files
-    # 2. then we can sort within partitions to at least get row groups sorted
-    # in Parquet
+    # Hotfix: Sorting issue.
+    # 1. Repartition to ensure we create our desired number of Parquet files.
+    # 2. Sort, solely within each partition, to at least get row groups sorted within Parquet.
     access_logs_df \
         .repartition(num_partitions) \
         .sortWithinPartitions(sort_keys) \
@@ -310,41 +312,41 @@ class S3ServerSideLoggingCompacter(object):
         parser.add_argument(
             '--aws-config',
             default='',
-            help='Path to aws config file. Default: %(default)s',
+            help='Path to the AWS config file. Default: %(default)s',
         )
         parser.add_argument(
             '--source-access-log-bucket',
             default='your-s3-bucket-where-s3-access-logs-are',
-            help='The S3 bucket storing s3 servier side logging  Default: %(default)s',
+            help='The S3 bucket containing S3 server side logging files. Default: %(default)s',
         )
         parser.add_argument(
             '--source-bucket',
             default='your-s3-bucket-where-the-original-contents-are',
-            help='The S3 bucket being monitored  Default: %(default)s',
+            help='The S3 bucket being monitored. Default: %(default)s',
         )
         parser.add_argument(
             '--destination-log-bucket',
             default='your-s3-bucket-where-to-store-the-parquet-files',
-            help='The S3 bucket storing compacted s3 servier side logging  Default: %(default)s',
+            help='The S3 bucket storing compacted S3 server side logging files. Default: %(default)s',
         )
         parser.add_argument(
             '--destination-log-prefix',
             default='teams/metrics-data/s3_server_side_access_logs',
-            help='S3 prefix being used for compacted logging  Default: %(default)s',
+            help='S3 prefix used to store compacted log files. Default: %(default)s',
         )
         parser.add_argument(
             '--num-output-files',
             default=10,
             type=int,
-            help='Number of output files  Default: %(default)s',
+            help='Number of output files. Default: %(default)s',
         )
         parser.add_argument(
             '--min-date',
-            help='starting date (inclusive)',
+            help='Starting date (inclusive).',
         )
         parser.add_argument(
             '--max-date',
-            help='ending date (exclusive)',
+            help='Ending date (exclusive).',
         )
 
     def start(self):

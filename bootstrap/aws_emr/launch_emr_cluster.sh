@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CLUSTER_NAME="${USER}_aws_logs_to_parquet_convertor"
+CLUSTER_NAME="${USER}_aws_logs_to_parquet_converter"
 BUCKET='your-bucket-name'
 
 
